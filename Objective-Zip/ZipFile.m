@@ -59,17 +59,17 @@
                 
                 NSMutableDictionary* dic = [NSMutableDictionary dictionary];
                 
-                do {
-                    FileInZipInfo* info = [self getCurrentFileInZipInfo];
-                    unz_file_pos pos;
-                    int err = unzGetFilePos(_unzFile, &pos);
-                    if (err == UNZ_OK) {
-                        [dic setObject:[NSArray arrayWithObjects:
-                                        [NSNumber numberWithLong:pos.pos_in_zip_directory],
-                                        [NSNumber numberWithLong:pos.num_of_file],
-                                        nil] forKey:info.name];
-                    }
-                } while (unzGoToNextFile (_unzFile) != UNZ_END_OF_LIST_OF_FILE);
+//                do {
+//                    FileInZipInfo* info = [self getCurrentFileInZipInfo];
+//                    unz_file_pos pos;
+//                    int err = unzGetFilePos(_unzFile, &pos);
+//                    if (err == UNZ_OK) {
+//                        [dic setObject:[NSArray arrayWithObjects:
+//                                        [NSNumber numberWithLong:pos.pos_in_zip_directory],
+//                                        [NSNumber numberWithLong:pos.num_of_file],
+//                                        nil] forKey:info.name];
+//                    }
+//                } while (unzGoToNextFile (_unzFile) != UNZ_END_OF_LIST_OF_FILE);
                 
                 contents = [dic retain];
                 
@@ -292,7 +292,22 @@
 	
     NSArray* info = [contents objectForKey:fileNameInZip];
     
-    if (!info) return NO;
+    if (!info) {
+        int err = unzLocateFile(_unzFile, [fileNameInZip cStringUsingEncoding:NSUTF8StringEncoding], 1);
+        if(err != UNZ_OK)
+            return NO;
+        unz_file_pos pos;
+        unzGetFilePos(_unzFile, &pos);
+        
+        FileInZipInfo* infos = [self getCurrentFileInZipInfo];
+        
+        info = [NSArray arrayWithObjects:
+                [NSNumber numberWithLong:pos.pos_in_zip_directory],
+                [NSNumber numberWithLong:pos.num_of_file],
+                nil];
+        [contents setObject:info forKey:infos.name];
+        
+    }
     
     unz_file_pos pos;
     pos.pos_in_zip_directory = [[info objectAtIndex:0] longValue];
