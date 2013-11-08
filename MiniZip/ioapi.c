@@ -13,9 +13,7 @@
 #include "zlib.h"
 #include "ioapi.h"
 
-#ifdef BUILD_INCLUDES_GD
-#include <GD/GD_C_FileSystem.h>
-#endif
+
 
 /* I've found an old Unix (a SunOS 4.1.3_U1) without all SEEK_* defined.... */
 
@@ -72,14 +70,10 @@ voidpf ZCALLBACK fopen_file_func (opaque, filename, mode)
    const char* filename;
    int mode;
 {
-#ifdef BUILD_INCLUDES_GD
-    GD_FILE* file = NULL;
-#else
     FILE* file = NULL;
-#endif
     const char* mode_fopen = NULL;
     if ((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER)==ZLIB_FILEFUNC_MODE_READ)
-        mode_fopen = "r+b";
+        mode_fopen = "rb";
     else
     if (mode & ZLIB_FILEFUNC_MODE_EXISTING)
         mode_fopen = "r+b";
@@ -88,11 +82,7 @@ voidpf ZCALLBACK fopen_file_func (opaque, filename, mode)
         mode_fopen = "wb";
 
     if ((filename!=NULL) && (mode_fopen != NULL))
-#ifdef BUILD_INCLUDES_GD
-        file = GD_fopen(filename, mode_fopen);
-#else
         file = fopen(filename, mode_fopen);
-#endif
     return file;
 }
 
@@ -104,11 +94,7 @@ uLong ZCALLBACK fread_file_func (opaque, stream, buf, size)
    uLong size;
 {
     uLong ret;
-#ifdef BUILD_INCLUDES_GD
-    ret = (uLong)GD_fread(buf, 1, (size_t)size, (GD_FILE *)stream);
-#else
     ret = (uLong)fread(buf, 1, (size_t)size, (FILE *)stream);
-#endif
     return ret;
 }
 
@@ -120,11 +106,7 @@ uLong ZCALLBACK fwrite_file_func (opaque, stream, buf, size)
    uLong size;
 {
     uLong ret;
-#ifdef BUILD_INCLUDES_GD
-    ret = (uLong)GD_fwrite(buf, 1, (size_t)size, (GD_FILE *)stream);
-#else
     ret = (uLong)fwrite(buf, 1, (size_t)size, (FILE *)stream);
-#endif
     return ret;
 }
 
@@ -133,11 +115,7 @@ long ZCALLBACK ftell_file_func (opaque, stream)
    voidpf stream;
 {
     long ret;
-#ifdef BUILD_INCLUDES_GD
-    ret = GD_ftell((GD_FILE *)stream);
-#else
     ret = ftell((FILE *)stream);
-#endif
     return ret;
 }
 
@@ -163,11 +141,7 @@ long ZCALLBACK fseek_file_func (opaque, stream, offset, origin)
     default: return -1;
     }
     ret = 0;
-#ifdef BUILD_INCLUDES_GD
-    GD_fseek((GD_FILE *)stream, offset, fseek_origin);
-#else
     fseek((FILE *)stream, offset, fseek_origin);
-#endif
     return ret;
 }
 
@@ -176,11 +150,7 @@ int ZCALLBACK fclose_file_func (opaque, stream)
    voidpf stream;
 {
     int ret;
-#ifdef BUILD_INCLUDES_GD
-    ret = GD_fclose((GD_FILE *)stream);
-#else
     ret = fclose((FILE *)stream);
-#endif
     return ret;
 }
 
